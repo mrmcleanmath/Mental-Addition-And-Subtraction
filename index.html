@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mental Addition & Subtraction | Mr. McLean Math</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --bg-alt: #ffffff;
+      --fg: #222222;
+      --accent: #2b7cff;
+      --accent-soft: #e2ecff;
+      --error: #c62828;
+      --ok: #2e7d32;
+      --border: #dddddd;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    body.high-contrast {
+      --bg: #000000;
+      --bg-alt: #111111;
+      --fg: #ffffff;
+      --accent: #ffcc00;
+      --accent-soft: #333333;
+      --border: #555555;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      margin: 0;
+    }
+
+    .pill {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .control-group {
+      background: var(--bg-alt);
+      border-radius: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem 0.75rem;
+    }
+
+    .control-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 0.25rem;
+    }
+
+    .segmented {
+      display: inline-flex;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .segmented button {
+      border: none;
+      background: transparent;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .segmented button.active {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    select, input[type="number"] {
+      padding: 0.2rem 0.4rem;
+      font-size: 0.9rem;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-alt);
+      border-radius: 0.8rem;
+      padding: 0.9rem;
+      border: 1px solid var(--border);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.05rem;
+    }
+
+    .mode-tabs {
+      display: inline-flex;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+
+    .mode-tabs button {
+      border: none;
+      background: transparent;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .mode-tabs button.active {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .question-area {
+      margin-top: 0.5rem;
+      margin-bottom: 0.75rem;
+      font-size: 1.6rem;
+      min-height: 2.6rem;
+      display: flex;
+      align-items: center;
+      word-wrap: break-word;
+    }
+
+    .question-label {
+      font-size: 0.9rem;
+      color: #555555;
+      margin-bottom: 0.25rem;
+    }
+
+    body.high-contrast .question-label {
+      color: #cccccc;
+    }
+
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-row input[type="text"] {
+      flex: 1 1 160px;
+      padding: 0.35rem 0.4rem;
+      font-size: 1.1rem;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-radius: 0.6rem;
+      border: none;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: transparent;
+      border-radius: 0.6rem;
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.9rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .feedback-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      min-height: 1.5rem;
+    }
+
+    .feedback {
+      font-weight: 600;
+    }
+
+    .feedback.ok {
+      color: var(--ok);
+    }
+
+    .feedback.err {
+      color: var(--error);
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 0.35rem;
+      font-size: 0.95rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .status-icons span {
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+    }
+
+    .status-icons .ok {
+      border-color: var(--ok);
+      color: var(--ok);
+    }
+
+    .status-icons .err {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .timer-display {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .steps {
+      margin-top: 0.3rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .steps p {
+      margin: 0.2rem 0;
+    }
+
+    .summary-list {
+      font-size: 0.85rem;
+      max-height: 220px;
+      overflow: auto;
+      border-top: 1px solid var(--border);
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+    }
+
+    .summary-list details {
+      margin-bottom: 0.4rem;
+    }
+
+    .summary-list summary {
+      cursor: pointer;
+    }
+
+    .summary-list .q {
+      font-weight: 600;
+    }
+
+    .summary-list .your {
+      color: var(--error);
+    }
+
+    .summary-list .correct {
+      color: var(--ok);
+    }
+
+    .worksheet-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      align-items: center;
+    }
+
+    .worksheet-output {
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .ws-item {
+      margin-bottom: 1.4rem;
+    }
+
+    .ws-answer {
+      display: none;
+      margin-top: 0.2rem;
+      font-size: 0.9rem;
+      color: #444444;
+    }
+
+    body.high-contrast .ws-answer {
+      color: #dddddd;
+    }
+
+    footer {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      text-align: center;
+      color: #666666;
+    }
+
+    body.high-contrast footer {
+      color: #bbbbbb;
+    }
+
+    /* Developer panel */
+    #dev-panel {
+      display: none;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+
+    #dev-panel pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Mental Addition &amp; Subtraction</h1>
+        <div class="pill">Practice mental sums and differences with flexible settings</div>
+      </div>
+      <div class="badge">Created by Mr. McLean Math</div>
+    </header>
+
+    <div class="controls" aria-label="Global controls">
+      <div class="control-group" aria-label="Main mode selection">
+        <label>Mode:</label>
+        <div class="segmented" id="mainModeButtons">
+          <button type="button" data-mode="game" class="active">Game</button>
+          <button type="button" data-mode="worksheet">Worksheet</button>
+        </div>
+      </div>
+
+      <div class="control-group" aria-label="Operation type">
+        <label>Operation:</label>
+        <div class="segmented" id="operationButtons">
+          <button type="button" data-op="add" class="active">Add</button>
+          <button type="button" data-op="sub">Subtract</button>
+          <button type="button" data-op="mixed">Mixed</button>
+        </div>
+      </div>
+
+      <div class="control-group" aria-label="Number of terms">
+        <label for="termCountSelect"># of numbers:</label>
+        <select id="termCountSelect">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <div class="control-group" aria-label="Digits per term">
+        <label for="digitCountSelect">Digits per number:</label>
+        <select id="digitCountSelect">
+          <option value="1">1 digit</option>
+          <option value="2">2 digits</option>
+          <option value="3" selected>3 digits</option>
+          <option value="4">4 digits</option>
+          <option value="5">5 digits</option>
+          <option value="6">6 digits</option>
+        </select>
+      </div>
+
+      <div class="control-group" aria-label="Timer and sound">
+        <div class="toggle">
+          <input type="checkbox" id="timerToggle">
+          <label for="timerToggle">Timer</label>
+          <select id="timerDuration">
+            <option value="30">30 s</option>
+            <option value="60" selected>60 s</option>
+            <option value="90">90 s</option>
+            <option value="120">120 s</option>
+          </select>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="soundToggle" checked>
+          <label for="soundToggle">Sound</label>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="contrastToggle">
+          <label for="contrastToggle">High contrast</label>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <!-- Game / Worksheet card -->
+      <section class="card" id="gameCard" aria-label="Main practice card">
+        <div class="mode-tabs" aria-label="Game mode tabs">
+          <button type="button" class="active" data-gamemode="game">Game</button>
+          <button type="button" data-gamemode="worksheet">Worksheet</button>
+        </div>
+
+        <!-- GAME SECTION -->
+        <div id="gameSection">
+          <p class="question-label" id="questionLabel">Calculate the result:</p>
+          <div class="question-area" id="questionArea" aria-live="polite"></div>
+
+          <div class="input-row">
+            <input type="text" id="answerInput" autocomplete="off" aria-label="Your answer">
+            <button type="button" id="submitBtn" class="primary">Submit (Enter)</button>
+            <button type="button" id="nextBtn" class="secondary" disabled>Next</button>
+          </div>
+
+          <div class="feedback-row" aria-live="polite">
+            <div class="feedback" id="feedbackArea"></div>
+            <div class="status-icons">
+              <span class="ok" id="statusCorrect">✔ 0</span>
+              <span class="err" id="statusIncorrect">✖ 0</span>
+              <span id="statusScore">Score: 0</span>
+              <span id="statusStreak">Streak: 0</span>
+              <span class="timer-display" id="timerDisplay"></span>
+            </div>
+          </div>
+
+          <div class="steps" id="stepsArea" aria-live="polite"></div>
+        </div>
+
+        <!-- WORKSHEET SECTION -->
+        <div id="worksheetSection" style="display:none;">
+          <h2 style="margin-top:0;">Worksheet mode</h2>
+          <div class="worksheet-controls">
+            <label for="wsOperation">Operation:</label>
+            <select id="wsOperation">
+              <option value="add">Add</option>
+              <option value="sub">Subtract</option>
+              <option value="mixed">Mixed</option>
+            </select>
+
+            <label for="wsTermCount"># of numbers:</label>
+            <select id="wsTermCount">
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+
+            <label for="wsDigitCount">Digits per number:</label>
+            <select id="wsDigitCount">
+              <option value="1">1 digit</option>
+              <option value="2">2 digits</option>
+              <option value="3" selected>3 digits</option>
+              <option value="4">4 digits</option>
+              <option value="5">5 digits</option>
+              <option value="6">6 digits</option>
+            </select>
+
+            <label for="wsCount">Questions:</label>
+            <select id="wsCount">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+            </select>
+
+            <button type="button" id="generateWsBtn" class="primary">Generate worksheet</button>
+            <button type="button" id="wsRevealAllBtn" class="secondary" disabled>Reveal all</button>
+            <button type="button" id="wsHideAllBtn" class="secondary" disabled>Hide all</button>
+          </div>
+          <div class="worksheet-output" id="worksheetOutput" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Summary card -->
+      <section class="card" aria-label="Session summary">
+        <h2>Session summary</h2>
+        <p>
+          Problems answered: <strong id="sumTotal">0</strong><br>
+          Correct: <strong id="sumCorrect">0</strong><br>
+          Accuracy: <strong id="sumAccuracy">0%</strong><br>
+          Score: <strong id="sumScore">0</strong><br>
+          Best streak: <strong id="sumBestStreak">0</strong>
+        </p>
+        <details>
+          <summary>Incorrect answers list</summary>
+          <div class="summary-list" id="incorrectList"></div>
+        </details>
+      </section>
+    </main>
+
+    <section id="dev-panel" class="card" aria-label="Developer tests">
+      <h2>Developer tests (?dev=1)</h2>
+      <pre id="dev-log"></pre>
+    </section>
+
+    <footer>
+      Created by Mr. McLean Math. Single-file game for mental addition and subtraction practice.
+    </footer>
+  </div>
+
+  <script>
+    // =========================
+    // Utility helpers
+    // =========================
+
+    function formatNumber(num) {
+      if (typeof num !== 'number' || !isFinite(num)) return String(num);
+      const negative = num < 0;
+      let s = Math.abs(num).toString();
+      // integers only in this game
+      s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      return (negative ? '-' : '') + s;
+    }
+
+    function normalizeInput(str) {
+      if (!str) return null;
+      str = String(str).trim();
+      if (!str) return null;
+      str = str.replace(/\s+/g, '');
+      str = str.replace(',', '.'); // support commas, though we only use integers
+      const val = Number(str);
+      if (!isFinite(val)) return null;
+      return val;
+    }
+
+    function randInt(min, max) {
+      // inclusive
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function choice(arr) {
+      return arr[randInt(0, arr.length - 1)];
+    }
+
+    function digitsRange(d) {
+      if (d === 1) return { min: 1, max: 9 };
+      const min = Math.pow(10, d - 1);
+      const max = Math.pow(10, d) - 1;
+      return { min, max };
+    }
+
+    function generateTermsAdd(count, digits) {
+      const { min, max } = digitsRange(digits);
+      const terms = [];
+      for (let i = 0; i < count; i++) {
+        terms.push(randInt(min, max));
+      }
+      return terms;
+    }
+
+    // For Subtract mode: create N D-digit terms, all positive, result >= 0
+    function generateTermsSubtract(count, digits) {
+      if (count < 2) count = 2;
+      const { min, max } = digitsRange(digits);
+      // Ensure first term big enough so result >= 0 is always possible
+      const firstMin = Math.max(min, (count - 1) * min);
+      const firstMax = max;
+      // If impossible (should not happen with count <= 5, digits <= 6), fallback to Add
+      if (firstMin > firstMax) {
+        return generateTermsAdd(count, digits);
+      }
+      const first = randInt(firstMin, firstMax);
+      const leftover = first - (count - 1) * min; // >= 0
+      // Split leftover into (count-1) nonnegative parts
+      const cuts = [];
+      for (let i = 0; i < count - 2; i++) {
+        cuts.push(randInt(0, leftover));
+      }
+      cuts.sort((a, b) => a - b);
+      const pieces = [];
+      let prev = 0;
+      for (let i = 0; i < cuts.length; i++) {
+        pieces.push(cuts[i] - prev);
+        prev = cuts[i];
+      }
+      pieces.push(leftover - prev);
+      const terms = [first];
+      for (let i = 0; i < pieces.length; i++) {
+        terms.push(min + pieces[i]);
+      }
+      return terms;
+    }
+
+    function evaluateExpression(terms, ops) {
+      // ops: array of '+' or '-' same length as terms, ops[0] is '+'
+      let total = terms[0];
+      for (let i = 1; i < terms.length; i++) {
+        if (ops[i] === '+') total += terms[i];
+        else total -= terms[i];
+      }
+      return total;
+    }
+
+    function buildExpressionHTML(terms, ops) {
+      let parts = [];
+      for (let i = 0; i < terms.length; i++) {
+        const valStr = formatNumber(terms[i]);
+        if (i === 0) {
+          parts.push(valStr);
+        } else {
+          const op = ops[i] === '+' ? ' + ' : ' - ';
+          parts.push(op + valStr);
+        }
+      }
+      return parts.join('');
+    }
+
+    // Mixed mode: random + and -, ensure at least one '-'
+    function generateMixedExpression(count, digits, maxTries) {
+      maxTries = maxTries || 50;
+      const { min, max } = digitsRange(digits);
+      for (let t = 0; t < maxTries; t++) {
+        const terms = [];
+        for (let i = 0; i < count; i++) {
+          terms.push(randInt(min, max));
+        }
+        const ops = new Array(count).fill('+');
+        let hasMinus = false;
+        for (let i = 1; i < count; i++) {
+          const sign = Math.random() < 0.5 ? '+' : '-';
+          ops[i] = sign;
+          if (sign === '-') hasMinus = true;
+        }
+        // Ensure at least one minus
+        if (!hasMinus && count > 1) {
+          const idx = randInt(1, count - 1);
+          ops[idx] = '-';
+          hasMinus = true;
+        }
+        const result = evaluateExpression(terms, ops);
+        if (result >= 0) {
+          return { terms, ops, result };
+        }
+      }
+      // Fallback: just use Add mode
+      const terms = generateTermsAdd(count, digits);
+      const ops = new Array(count).fill('+');
+      const result = evaluateExpression(terms, ops);
+      return { terms, ops, result };
+    }
+
+    function generateProblem(operation, termCount, digits) {
+      let terms, ops, result;
+      if (operation === 'add') {
+        terms = generateTermsAdd(termCount, digits);
+        ops = new Array(termCount).fill('+');
+        result = evaluateExpression(terms, ops);
+        // result will be > 0 and integer
+      } else if (operation === 'sub') {
+        terms = generateTermsSubtract(termCount, digits);
+        ops = new Array(termCount).fill('-');
+        ops[0] = '+'; // expression: a - b - c - ...
+        result = evaluateExpression(terms, ops);
+        if (result < 0) {
+          // Very unlikely; fallback to add
+          terms = generateTermsAdd(termCount, digits);
+          ops = new Array(termCount).fill('+');
+          result = evaluateExpression(terms, ops);
+        }
+      } else { // mixed
+        const mix = generateMixedExpression(termCount, digits);
+        terms = mix.terms;
+        ops = mix.ops;
+        result = mix.result;
+      }
+      const exprHTML = buildExpressionHTML(terms, ops);
+      return {
+        operation,
+        terms,
+        ops,
+        result,
+        questionHTML: exprHTML,
+        label: 'Calculate the result:'
+      };
+    }
+
+    // =========================
+    // Game state
+    // =========================
+
+    const state = {
+      currentProblem: null,
+      mainMode: 'game',  // 'game' or 'worksheet'
+      operation: 'add',  // 'add' | 'sub' | 'mixed'
+      termCount: 3,
+      digitCount: 3,
+      stats: {
+        total: 0,
+        correct: 0,
+        incorrect: 0,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        incorrectList: []
+      },
+      timer: {
+        enabled: false,
+        duration: 60,
+        remaining: 0,
+        id: null
+      },
+      lastWasCorrect: false
+    };
+
+    // =========================
+    // DOM references
+    // =========================
+
+    const mainModeButtons = document.getElementById('mainModeButtons');
+    const operationButtons = document.getElementById('operationButtons');
+    const termCountSelect = document.getElementById('termCountSelect');
+    const digitCountSelect = document.getElementById('digitCountSelect');
+    const timerToggle = document.getElementById('timerToggle');
+    const timerDurationSel = document.getElementById('timerDuration');
+    const soundToggle = document.getElementById('soundToggle');
+    const contrastToggle = document.getElementById('contrastToggle');
+
+    const gameCard = document.getElementById('gameCard');
+    const gameSection = document.getElementById('gameSection');
+    const worksheetSection = document.getElementById('worksheetSection');
+    const questionArea = document.getElementById('questionArea');
+    const questionLabel = document.getElementById('questionLabel');
+    const answerInput = document.getElementById('answerInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const stepsArea = document.getElementById('stepsArea');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const statusCorrect = document.getElementById('statusCorrect');
+    const statusIncorrect = document.getElementById('statusIncorrect');
+    const statusScore = document.getElementById('statusScore');
+    const statusStreak = document.getElementById('statusStreak');
+
+    const sumTotal = document.getElementById('sumTotal');
+    const sumCorrect = document.getElementById('sumCorrect');
+    const sumAccuracy = document.getElementById('sumAccuracy');
+    const sumScore = document.getElementById('sumScore');
+    const sumBestStreak = document.getElementById('sumBestStreak');
+    const incorrectList = document.getElementById('incorrectList');
+
+    const wsOperation = document.getElementById('wsOperation');
+    const wsTermCount = document.getElementById('wsTermCount');
+    const wsDigitCount = document.getElementById('wsDigitCount');
+    const wsCount = document.getElementById('wsCount');
+    const generateWsBtn = document.getElementById('generateWsBtn');
+    const wsRevealAllBtn = document.getElementById('wsRevealAllBtn');
+    const wsHideAllBtn = document.getElementById('wsHideAllBtn');
+    const worksheetOutput = document.getElementById('worksheetOutput');
+
+    const devPanel = document.getElementById('dev-panel');
+    const devLog = document.getElementById('dev-log');
+
+    // =========================
+    // Timer & sound
+    // =========================
+
+    function playBeep(freq, duration) {
+      if (!soundToggle.checked) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        gain.gain.value = 0.15;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        setTimeout(() => {
+          osc.stop();
+          ctx.close();
+        }, duration || 150);
+      } catch (e) {
+        // ignore if AudioContext not available
+      }
+    }
+
+    function stopTimer() {
+      if (state.timer.id !== null) {
+        clearInterval(state.timer.id);
+        state.timer.id = null;
+      }
+      timerDisplay.textContent = '';
+    }
+
+    function startTimer() {
+      stopTimer();
+      if (!state.timer.enabled) return;
+      state.timer.remaining = state.timer.duration;
+      timerDisplay.textContent = state.timer.remaining + ' s';
+      state.timer.id = setInterval(() => {
+        state.timer.remaining--;
+        if (state.timer.remaining <= 0) {
+          timerDisplay.textContent = "Time's up!";
+          clearInterval(state.timer.id);
+          state.timer.id = null;
+          handleTimeUp();
+        } else {
+          timerDisplay.textContent = state.timer.remaining + ' s';
+        }
+      }, 1000);
+    }
+
+    function handleTimeUp() {
+      if (!state.currentProblem) return;
+      if (state.lastWasCorrect) return;
+      if (!submitBtn.disabled) {
+        submitBtn.disabled = true;
+        nextBtn.disabled = false;
+        feedbackArea.textContent = "Time's up! Correct answer: " + formatNumber(state.currentProblem.result);
+        feedbackArea.className = 'feedback err';
+        playBeep(260, 180);
+        recordResult(false, null);
+      }
+    }
+
+    // =========================
+    // Game mechanics
+    // =========================
+
+    function updateStatsDisplay() {
+      const s = state.stats;
+      statusCorrect.textContent = '✔ ' + s.correct;
+      statusIncorrect.textContent = '✖ ' + s.incorrect;
+      statusScore.textContent = 'Score: ' + s.score;
+      statusStreak.textContent = 'Streak: ' + s.streak;
+
+      sumTotal.textContent = s.total;
+      sumCorrect.textContent = s.correct;
+      const accuracy = s.total ? Math.round((s.correct / s.total) * 100) : 0;
+      sumAccuracy.textContent = accuracy + '%';
+      sumScore.textContent = s.score;
+      sumBestStreak.textContent = s.bestStreak;
+
+      incorrectList.innerHTML = '';
+      s.incorrectList.forEach((item, idx) => {
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = (idx + 1) + '. ' + item.operationLabel;
+        details.appendChild(summary);
+        const p = document.createElement('div');
+        p.innerHTML = '<div class="q">Q: ' + item.questionHTML + '</div>' +
+                      '<div class="your">Your answer: ' + item.yourAnswer + '</div>' +
+                      '<div class="correct">Correct answer: ' + formatNumber(item.correctAnswer) + '</div>';
+        details.appendChild(p);
+        incorrectList.appendChild(details);
+      });
+    }
+
+    function recordResult(isCorrect, userValue) {
+      const s = state.stats;
+      s.total++;
+      if (isCorrect) {
+        s.correct++;
+        s.score += 10;
+        s.streak++;
+        if (s.streak % 5 === 0) {
+          s.score += 5;
+        }
+        if (s.streak > s.bestStreak) s.bestStreak = s.streak;
+      } else {
+        s.incorrect++;
+        s.streak = 0;
+        if (state.currentProblem) {
+          s.incorrectList.push({
+            questionHTML: state.currentProblem.questionHTML,
+            correctAnswer: state.currentProblem.result,
+            yourAnswer: userValue === null ? '(no answer)' : userValue,
+            operationLabel: (state.currentProblem.operation === 'add'
+              ? 'Add'
+              : state.currentProblem.operation === 'sub'
+                ? 'Subtract'
+                : 'Mixed')
+          });
+        }
+      }
+      updateStatsDisplay();
+    }
+
+    function loadNewProblem() {
+      state.lastWasCorrect = false;
+      const operation = state.operation;
+      const termCount = state.termCount;
+      const digitCount = state.digitCount;
+      const prob = generateProblem(operation, termCount, digitCount);
+      state.currentProblem = prob;
+      questionArea.innerHTML = prob.questionHTML;
+      questionLabel.textContent = prob.label;
+      stepsArea.innerHTML = '';
+      feedbackArea.textContent = '';
+      feedbackArea.className = 'feedback';
+      answerInput.value = '';
+      submitBtn.disabled = false;
+      nextBtn.disabled = true;
+      answerInput.focus();
+      if (state.timer.enabled) {
+        startTimer();
+      } else {
+        stopTimer();
+      }
+    }
+
+    function checkAnswer() {
+      if (!state.currentProblem) return;
+      const val = normalizeInput(answerInput.value);
+      if (val === null) {
+        feedbackArea.textContent = 'Please enter a number.';
+        feedbackArea.className = 'feedback err';
+        return;
+      }
+      const ans = state.currentProblem.result;
+      const correct = Math.abs(val - ans) < 1e-9;
+      state.lastWasCorrect = correct;
+      submitBtn.disabled = true;
+      nextBtn.disabled = false;
+      stopTimer();
+
+      if (correct) {
+        feedbackArea.textContent = 'Correct!';
+        feedbackArea.className = 'feedback ok';
+        playBeep(880, 180);
+        stepsArea.innerHTML = '';
+      } else {
+        feedbackArea.textContent = 'Incorrect. Correct answer: ' + formatNumber(ans);
+        feedbackArea.className = 'feedback err';
+        playBeep(260, 180);
+        // Optional: very short “mental strategy” note
+        stepsArea.innerHTML = '<p>Tip: Try grouping numbers to make tens, hundreds, or thousands in your head.</p>';
+      }
+
+      recordResult(correct, answerInput.value.trim());
+    }
+
+    // =========================
+    // Worksheet generation
+    // =========================
+
+    function generateWorksheet() {
+      const count = Number(wsCount.value);
+      const op = wsOperation.value;
+      const termCount = Number(wsTermCount.value);
+      const digitCount = Number(wsDigitCount.value);
+
+      worksheetOutput.innerHTML = '';
+      const items = [];
+
+      for (let i = 0; i < count; i++) {
+        const prob = generateProblem(op, termCount, digitCount);
+        items.push(prob);
+      }
+
+      items.forEach((prob, idx) => {
+        const div = document.createElement('div');
+        div.className = 'ws-item';
+        const qNum = idx + 1;
+        const label = 'Calculate: ';
+        div.innerHTML =
+          '<div><strong>' + qNum + '.</strong> ' +
+          label + prob.questionHTML + '</div>' +
+          '<div style="border-bottom:1px solid #ccc; margin-top:0.4rem;"></div>' +
+          '<div style="border-bottom:1px solid #ccc; margin-top:0.4rem;"></div>';
+        const ansDiv = document.createElement('div');
+        ansDiv.className = 'ws-answer';
+        ansDiv.innerHTML = '<em>Answer:</em> ' + formatNumber(prob.result);
+        div.appendChild(ansDiv);
+        div.addEventListener('click', () => {
+          ansDiv.style.display = ansDiv.style.display === 'none' || ansDiv.style.display === '' ? 'block' : 'none';
+        });
+        worksheetOutput.appendChild(div);
+      });
+
+      if (items.length > 0) {
+        wsRevealAllBtn.disabled = false;
+        wsHideAllBtn.disabled = false;
+      } else {
+        wsRevealAllBtn.disabled = true;
+        wsHideAllBtn.disabled = true;
+      }
+    }
+
+    function setWorksheetAnswersVisible(visible) {
+      const answers = worksheetOutput.querySelectorAll('.ws-answer');
+      answers.forEach(a => {
+        a.style.display = visible ? 'block' : 'none';
+      });
+    }
+
+    // =========================
+    // Event listeners
+    // =========================
+
+    mainModeButtons.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON') return;
+      const mode = e.target.getAttribute('data-mode');
+      Array.from(mainModeButtons.querySelectorAll('button')).forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+      state.mainMode = mode;
+      const tabs = gameCard.querySelectorAll('.mode-tabs button');
+      if (mode === 'game') {
+        gameSection.style.display = '';
+        worksheetSection.style.display = 'none';
+        tabs[0].classList.add('active');
+        tabs[1].classList.remove('active');
+      } else {
+        gameSection.style.display = 'none';
+        worksheetSection.style.display = '';
+        tabs[0].classList.remove('active');
+        tabs[1].classList.add('active');
+      }
+    });
+
+    // Inner tabs in card
+    gameCard.querySelector('.mode-tabs').addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON') return;
+      const gm = e.target.getAttribute('data-gamemode');
+      const tabs = gameCard.querySelectorAll('.mode-tabs button');
+      Array.from(tabs).forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+      if (gm === 'game') {
+        gameSection.style.display = '';
+        worksheetSection.style.display = 'none';
+        mainModeButtons.querySelector('button[data-mode="game"]').classList.add('active');
+        mainModeButtons.querySelector('button[data-mode="worksheet"]').classList.remove('active');
+        state.mainMode = 'game';
+      } else {
+        gameSection.style.display = 'none';
+        worksheetSection.style.display = '';
+        mainModeButtons.querySelector('button[data-mode="game"]').classList.remove('active');
+        mainModeButtons.querySelector('button[data-mode="worksheet"]').classList.add('active');
+        state.mainMode = 'worksheet';
+      }
+    });
+
+    operationButtons.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON') return;
+      const op = e.target.getAttribute('data-op');
+      Array.from(operationButtons.querySelectorAll('button')).forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+      state.operation = op;
+      loadNewProblem();
+    });
+
+    termCountSelect.addEventListener('change', () => {
+      state.termCount = Number(termCountSelect.value);
+      loadNewProblem();
+    });
+
+    digitCountSelect.addEventListener('change', () => {
+      state.digitCount = Number(digitCountSelect.value);
+      loadNewProblem();
+    });
+
+    timerToggle.addEventListener('change', () => {
+      state.timer.enabled = timerToggle.checked;
+      if (state.timer.enabled) {
+        state.timer.duration = Number(timerDurationSel.value);
+        startTimer();
+      } else {
+        stopTimer();
+      }
+    });
+
+    timerDurationSel.addEventListener('change', () => {
+      state.timer.duration = Number(timerDurationSel.value);
+      if (state.timer.enabled) {
+        startTimer();
+      }
+    });
+
+    contrastToggle.addEventListener('change', () => {
+      if (contrastToggle.checked) {
+        document.body.classList.add('high-contrast');
+      } else {
+        document.body.classList.remove('high-contrast');
+      }
+    });
+
+    submitBtn.addEventListener('click', checkAnswer);
+    nextBtn.addEventListener('click', () => {
+      loadNewProblem();
+    });
+
+    answerInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (!submitBtn.disabled) {
+          checkAnswer();
+        } else if (!nextBtn.disabled && state.lastWasCorrect) {
+          loadNewProblem();
+        }
+      } else if (e.key === 'Escape') {
+        answerInput.value = '';
+      }
+    });
+
+    generateWsBtn.addEventListener('click', generateWorksheet);
+    wsRevealAllBtn.addEventListener('click', () => setWorksheetAnswersVisible(true));
+    wsHideAllBtn.addEventListener('click', () => setWorksheetAnswersVisible(false));
+
+    // =========================
+    // Developer tests (?dev=1)
+    // =========================
+
+    function runDevTests() {
+      const params = new URLSearchParams(location.search);
+      if (!params.has('dev')) return;
+      devPanel.style.display = 'block';
+      const logs = [];
+
+      function log(name, passed, info) {
+        logs.push((passed ? '✅ ' : '❌ ') + name + (info ? ' — ' + info : ''));
+      }
+
+      // 1. No negative results for add/sub/mixed
+      (function () {
+        let ok = true;
+        ['add', 'sub', 'mixed'].forEach(op => {
+          for (let i = 0; i < 30; i++) {
+            const p = generateProblem(op, 4, 3);
+            if (p.result < 0) {
+              ok = false;
+              break;
+            }
+          }
+        });
+        log('No negative results for any mode', ok);
+      })();
+
+      // 2. Digit length respected
+      (function () {
+        let ok = true;
+        const checkDigits = (n, d) => n.toString().replace('-', '').length === d;
+        for (let d = 1; d <= 4; d++) {
+          for (let i = 0; i < 20; i++) {
+            const p = generateProblem('add', 3, d);
+            if (!p.terms.every(t => checkDigits(t, d))) {
+              ok = false;
+              break;
+            }
+          }
+        }
+        log('Each term has the correct number of digits', ok);
+      })();
+
+      // 3. Mixed mode actually includes minus signs
+      (function () {
+        let hasMinus = false;
+        for (let i = 0; i < 40; i++) {
+          const p = generateProblem('mixed', 4, 2);
+          if (p.ops.slice(1).includes('-')) {
+            hasMinus = true;
+            break;
+          }
+        }
+        log('Mixed mode uses at least one "-" operator', hasMinus);
+      })();
+
+      // 4. Formatting adds spaces
+      (function () {
+        const f = formatNumber(1234567);
+        log('Number formatting uses spaces for thousands', f === '1 234 567', 'Output: ' + f);
+      })();
+
+      // 5. Input normalization strips spaces & commas
+      (function () {
+        const v = normalizeInput(' 1 234 ');
+        const v2 = normalizeInput('1234,0');
+        log('Input normalization strips spaces', v === 1234, 'Got ' + v);
+        log('Input normalization handles comma', Math.abs(v2 - 1234) < 1e-9 || Math.abs(v2 - 1234.0) < 1e-9, 'Got ' + v2);
+      })();
+
+      // 6. Worksheet count check
+      (function () {
+        const n = 7;
+        let items = [];
+        for (let i = 0; i < n; i++) {
+          items.push(generateProblem('add', 3, 3));
+        }
+        log('Worksheet generator concept (count)', items.length === n, 'Length ' + items.length);
+      })();
+
+      // 7. Subtract mode result non-negative
+      (function () {
+        let ok = true;
+        for (let i = 0; i < 30; i++) {
+          const p = generateProblem('sub', 5, 3);
+          if (p.result < 0) {
+            ok = false;
+            break;
+          }
+        }
+        log('Subtract mode generates non-negative results', ok);
+      })();
+
+      // 8. Term count respected
+      (function () {
+        let ok = true;
+        for (let n = 2; n <= 5; n++) {
+          const p = generateProblem('add', n, 2);
+          if (p.terms.length !== n) {
+            ok = false;
+            break;
+          }
+        }
+        log('Term count matches dropdown', ok);
+      })();
+
+      // 9. Timer duration settable
+      (function () {
+        state.timer.duration = 90;
+        log('Timer duration settable', state.timer.duration === 90);
+      })();
+
+      // 10. Score / streak logic basic sanity
+      (function () {
+        const backup = JSON.parse(JSON.stringify(state.stats));
+        state.stats = { total:0, correct:0, incorrect:0, score:0, streak:0, bestStreak:0, incorrectList:[] };
+        recordResult(true, '5');
+        recordResult(true, '10');
+        recordResult(false, '0');
+        const ok = state.stats.correct === 2 && state.stats.incorrect === 1 && state.stats.streak === 0;
+        log('Score and streak basic behavior', ok, JSON.stringify(state.stats));
+        state.stats = backup;
+        updateStatsDisplay();
+      })();
+
+      devLog.textContent = logs.join('\n');
+    }
+
+    // =========================
+    // Init
+    // =========================
+    document.addEventListener('DOMContentLoaded', () => {
+      state.operation = 'add';
+      state.termCount = Number(termCountSelect.value);
+      state.digitCount = Number(digitCountSelect.value);
+      state.timer.enabled = false;
+      state.timer.duration = Number(timerDurationSel.value);
+      updateStatsDisplay();
+      loadNewProblem();
+      runDevTests();
+    });
+  </script>
+</body>
+</html>
