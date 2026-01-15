@@ -599,21 +599,45 @@
     function generateTermsSubtract(count, digits) {
       if (count < 2) count = 2;
       const { min, max } = digitsRange(digits);
-      // Ensure first term big enough so result >= 0 is always possible
+
+      // ✅ FIX: Special-case for 2-term subtraction so we don't force a - a every time.
+      if (count === 2) {
+        // Generate two independent D-digit numbers, then order them so result >= 0.
+        let a = randInt(min, max);
+        let b = randInt(min, max);
+
+        // Try a few times to avoid equality (still allowed occasionally if RNG keeps hitting it).
+        for (let tries = 0; tries < 6 && a === b; tries++) {
+          b = randInt(min, max);
+        }
+
+        if (b > a) {
+          const tmp = a;
+          a = b;
+          b = tmp;
+        }
+        return [a, b];
+      }
+
+      // Existing logic for 3+ terms: ensure first term big enough so result >= 0 is always possible
       const firstMin = Math.max(min, (count - 1) * min);
       const firstMax = max;
+
       // If impossible (should not happen with count <= 5, digits <= 6), fallback to Add
       if (firstMin > firstMax) {
         return generateTermsAdd(count, digits);
       }
+
       const first = randInt(firstMin, firstMax);
       const leftover = first - (count - 1) * min; // >= 0
+
       // Split leftover into (count-1) nonnegative parts
       const cuts = [];
       for (let i = 0; i < count - 2; i++) {
         cuts.push(randInt(0, leftover));
       }
       cuts.sort((a, b) => a - b);
+
       const pieces = [];
       let prev = 0;
       for (let i = 0; i < cuts.length; i++) {
@@ -621,6 +645,7 @@
         prev = cuts[i];
       }
       pieces.push(leftover - prev);
+
       const terms = [first];
       for (let i = 0; i < pieces.length; i++) {
         terms.push(min + pieces[i]);
